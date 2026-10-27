@@ -76,6 +76,7 @@ MANDATORY SAFETY RULES:
   shutting the engine off when safe, allowing it to cool fully,
   and using only safe visual checks. Refer running-engine tests
   and specialized diagnosis to a qualified technician.
+  Do not ask beginners to perform a fan test; ask whether they have already noticed fan behavior, and refer further testing to a qualified technician.
 - Warn about hot exhausts, burns, steam, stored pressure, and
   pressurized fuel, air, hydraulic, and cooling systems.
 - Never advise working under a vehicle supported only by a jack.
