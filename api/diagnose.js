@@ -61,28 +61,25 @@ manual and vehicle identification details. A photo does not prove a
 fault; distinguish visible observations from guesses.
 
 MANDATORY SAFETY RULES:
-- Never tell users to touch hot radiator hoses, open a hot radiator
-  cap, or open a hot pressurized cooling system. Shut down an
-  overheating engine when safe and allow it to cool completely. Do not tell users to run an overheating engine to watch the fan
-  or touch a hose to test the thermostat. Keep hands, clothing,
-  tools, and body parts away from moving fans and belts. Use visual
-  checks only with the engine off and when safe. If a test requires
-  a running engine, electrical probing, or pressure testing, direct
-  the user to a qualified technician.
-  - For beginner users, never recommend running an overheating
-  engine as a diagnostic test or asking the user to observe
-  a running cooling fan. Do not recommend touching hoses to
-  diagnose temperature or thermostat problems. Recommend
-  shutting the engine off when safe, allowing it to cool fully,
-  and using only safe visual checks. Refer running-engine tests
-  and specialized diagnosis to a qualified technician.
-  Do not ask beginners to perform a fan test; ask whether they have already noticed fan behavior, and refer further testing to a qualified technician.
+-Never tell users to touch hot radiator hoses, open a hot radiator
+  cap, or open a hot pressurized cooling system. Tell them to shut
+  down an overheating engine when safe and let it cool completely.
+- For beginners, never recommend running an overheating engine as
+  a diagnostic test or asking them to observe a running cooling fan.
+  Never ask them to touch hoses to diagnose temperature or thermostat
+  problems. Ask whether they have already noticed fan behavior, but
+  refer fan testing and other running-engine tests to a qualified
+  technician.
+- For cooling-system checks, begin with the engine off and completely
+  cool. Suggest only safe visual checks that do not require touching
+  hazardous components, removing pressurized caps, or running the
+  engine. Do not imply these checks confirm a diagnosis.
 - Warn about hot exhausts, burns, steam, stored pressure, and
   pressurized fuel, air, hydraulic, and cooling systems.
 - Never advise working under a vehicle supported only by a jack.
   Require properly rated jack stands or approved lifting equipment
   on firm, level ground, with appropriate wheel restraints.
-- Never advise putting hands or tools near moving belts, fans, or
+- Keep hands, clothing, and tools away from moving belts, fans, and
   machinery. Electric fans may start unexpectedly.
 - Never advise bypassing safety interlocks, disabling emissions or
   safety systems, or attempting untrained brake, airbag, or other
@@ -177,12 +174,12 @@ Keep the diagnostic guidance practical, concise, and easy to follow.
       ? `\n\n⚠️ AVISO UNIVERSAL DE SEGURIDAD\nEsta información es orientativa y puede ser incompleta o incorrecta; no es un diagnóstico confirmado ni sustituye el manual de servicio, la capacitación o una inspección profesional. Usted es responsable de evaluar los riesgos, utilizar el EPP adecuado y seguir los procedimientos del fabricante. Tenga cuidado con superficies calientes, vapor, presión almacenada, electricidad y piezas móviles. Apague el equipo cuando sea seguro y deje que se enfríe completamente antes de revisarlo. Nunca abra un sistema de refrigeración caliente ni trabaje debajo de un vehículo sostenido solo por un gato; utilice soportes de seguridad adecuados sobre una superficie firme y nivelada. En vehículos eléctricos, no toque componentes de alto voltaje. Deténgase si no sabe cómo realizar el trabajo de forma segura y consulte a un profesional calificado.`
       : `\n\n⚠️ UNIVERSAL SAFETY DISCLAIMER\nThis information is general guidance and may be incomplete or incorrect; it is not a confirmed diagnosis and does not replace the service manual, professional training, or a qualified inspection. You are responsible for assessing risks, using appropriate PPE, and following manufacturer procedures. Beware of hot surfaces, steam, stored pressure, electricity, and moving parts. Shut equipment down when safe and allow it to cool completely before inspection. Never open a hot cooling system or work under a vehicle supported only by a jack; use properly rated safety stands on firm, level ground. Never touch high-voltage EV components. Stop if you cannot perform the work safely and consult a qualified professional.`;
 
-    const videoTerms = [
-      vehicle,
-      equipment,
-      problem,
-      spanish ? 'reparación tutorial español' : 'repair tutorial English'
-    ].filter(Boolean).join(' ');
+  const videoTerms = buildVideoSearchTerms(
+  vehicle,
+  equipment,
+  problem,
+  spanish
+);
 
     const videoUrl =
       'https://www.youtube.com/results?search_query=' +
@@ -226,7 +223,7 @@ function validatePhoto(value) {
       error: 'Photo is too large. Choose a smaller image (under about 1.5 MB after compression).'
     };
   }
-
+ 
   const match = value.match(
     /^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/
   );
@@ -236,4 +233,32 @@ function validatePhoto(value) {
   }
 
   return { data: value };
+}
+function buildVideoSearchTerms(vehicle, equipment, problem, spanish) {
+  const stopWords = new Set(
+    (spanish
+      ? 'mi el la los las un una de del y es está esta que cómo qué puedo debo revisar primero ayuda por favor'
+      : 'my the a an is are was were what how can should do i check first please help with for and'
+    ).split(/\s+/)
+  );
+
+  const genericEquipment = /^(car or pickup|car|vehicle|automobile|truck|other)$/i;
+  const usefulEquipment = genericEquipment.test(equipment.trim())
+    ? ''
+    : equipment;
+
+  const symptomWords = problem
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
+    .split(/\s+/)
+    .filter(word => word && !stopWords.has(word))
+    .slice(0, 10)
+    .join(' ');
+
+  return [
+    vehicle,
+    usefulEquipment,
+    symptomWords,
+    spanish ? 'diagnóstico reparación español' : 'diagnosis repair tutorial English'
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 }
